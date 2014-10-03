@@ -1,0 +1,73 @@
+{
+    "provisioners": [
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/base.sh",
+                "scripts/virtualbox.sh",
+                "scripts/vagrant.sh",
+                "scripts/puphpet.sh",
+                "scripts/cleanup.sh",
+                "scripts/zerodisk.sh"
+            ],
+            "override": {
+                "virtualbox-iso": {
+                    "execute_command": "echo 'vagrant'|sudo -S bash '{{.Path}}'"
+                }
+            }
+        }
+    ],
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "boot_command": [
+                "<esc><wait>",
+                "install <wait>",
+                "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-7/preseed.cfg <wait>",
+                "debian-installer=en_US <wait>",
+                "auto <wait>",
+                "locale=en_US <wait>",
+                "kbd-chooser/method=us <wait>",
+                "netcfg/get_hostname={{ .Name }} <wait>",
+                "netcfg/get_domain=vagrantup.com <wait>",
+                "fb=false <wait>",
+                "debconf/frontend=noninteractive <wait>",
+                "console-setup/ask_detect=false <wait>",
+                "console-keymaps-at/keymap=us <wait>",
+                "keyboard-configuration/xkb-keymap=us <wait>",
+                "<enter><wait>"
+            ],
+            "boot_wait": "10s",
+            "disk_size": 20480,
+            "guest_os_type": "Debian_64",
+            "http_directory": "http",
+            "iso_checksum": "e80ceb12a5d54991624aa91694ac7cdc",
+            "iso_checksum_type": "md5",
+            "iso_url": "http://mirror.rackspace.com/debian/dists/stable/main/installer-amd64/current/images/netboot/mini.iso",
+            "ssh_username": "hw",
+            "ssh_password": "vagrant",
+            "ssh_port": 22,
+            "ssh_wait_timeout": "10000s",
+            "shutdown_command": "echo '/sbin/halt -h -p' > shutdown.sh; echo 'vagrant'|sudo -S bash 'shutdown.sh'",
+            "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+            "virtualbox_version_file": ".vbox_version",
+            "vboxmanage": [
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--memory",
+                    "768"
+                ],
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--cpus",
+                    "2"
+                ]
+            ]
+        }
+    ],
+    "post-processors": [
+        "vagrant"
+    ]
+}
